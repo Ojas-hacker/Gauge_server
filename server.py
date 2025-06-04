@@ -97,4 +97,4 @@ def append_to_master_csv(file_path):
         print(f"Error appending to master CSV: {str(e)}")
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
