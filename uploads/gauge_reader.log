@@ -1,0 +1,152 @@
+[12:21:19] Default configuration loaded
+[12:21:26] Camera started
+[12:21:34] Loaded 7 crop regions
+[12:21:34] Crop regions marked on image
+[12:21:34] Image captured and saved to: captured_image.jpg
+[12:21:34] Camera stopped
+[12:21:39] Loaded 7 crop regions
+[12:21:39] Crop regions marked on image
+[12:21:39] Image loaded: (640, 480)
+[12:25:43] Default configuration loaded
+[12:25:48] Camera started
+[12:25:50] Camera stopped
+[12:25:52] Camera started
+[12:25:54] Loaded 7 crop regions
+[12:25:54] Crop regions marked on image
+[12:25:54] Image captured and saved to: captured_image.jpg
+[12:25:54] Camera stopped
+[12:28:43] Default configuration loaded
+[12:28:44] Camera started
+[12:28:47] Loaded 7 crop regions
+[12:28:47] Crop regions marked on image
+[12:28:47] Image captured and saved to: captured_image.jpg
+[12:28:48] Loaded 7 crop regions
+[12:28:48] Crop regions marked on image
+[12:28:48] Image captured and saved to: captured_image.jpg
+[12:28:49] Loaded 7 crop regions
+[12:28:49] Crop regions marked on image
+[12:28:49] Image captured and saved to: captured_image.jpg
+[12:28:50] Loaded 7 crop regions
+[12:28:50] Crop regions marked on image
+[12:28:50] Image captured and saved to: captured_image.jpg
+[12:28:52] Loaded 7 crop regions
+[12:28:52] Crop regions marked on image
+[12:28:52] Image captured and saved to: captured_image.jpg
+[12:28:53] Loaded 7 crop regions
+[12:28:53] Crop regions marked on image
+[12:28:53] Image captured and saved to: captured_image.jpg
+[12:29:12] Camera stopped
+[12:29:59] Default configuration loaded
+[12:30:00] Camera started
+[12:30:15] Loaded 7 crop regions
+[12:30:15] Crop regions marked on image
+[12:30:15] Image captured and saved to: captured_image.jpg
+[12:30:34] Camera stopped
+[13:07:38] Default configuration loaded
+[13:07:39] Camera started
+[13:07:41] Loaded 7 crop regions
+[13:07:41] Crop regions marked on image
+[13:07:41] Image captured and saved to: captured_image.jpg
+[13:07:42] Loaded 7 crop regions
+[13:07:42] Crop regions marked on image
+[13:07:42] Image captured and saved to: captured_image.jpg
+[13:07:42] Loaded 7 crop regions
+[13:07:42] Crop regions marked on image
+[13:07:42] Image captured and saved to: captured_image.jpg
+[13:08:01] ==================================================
+[13:08:01] Starting gauge processing...
+[13:08:01] Cropping gauges from image...
+[13:08:01] Processing cropped images...
+[13:08:01] Processing gauge 1...
+[13:08:01] Gauge 1: Unable to read - Processing error psi
+[13:08:01] Processing gauge 2...
+[13:08:01] Gauge 2: Unable to read - Processing error psi
+[13:08:01] Processing gauge 3...
+[13:08:01] Gauge 3: Unable to read - Processing error psi
+[13:08:01] Processing gauge 4...
+[13:08:01] Gauge 4: Unable to read - Processing error psi
+[13:08:01] Processing gauge 5...
+[13:08:01] Gauge 5: Unable to read - Processing error psi
+[13:08:01] Processing gauge 6...
+[13:08:01] Gauge 6: Unable to read - Processing error psi
+[13:08:01] Processing digital meter (Gauge 7)...
+[13:08:04] Gauge 7 (Digital): None
+[13:08:04] Results appended to: data/gauge_readings.csv
+[13:08:04] Error saving CSV: read of closed file
+[13:08:04] Processing completed! 7 successful readings
+[13:12:40] Camera stopped
+[13:14:19] Default configuration loaded
+[13:14:20] Camera started
+[13:14:25] Loaded 7 crop regions
+[13:14:25] Crop regions marked on image
+[13:14:25] Image captured and saved to: captured_image.jpg
+[13:14:26] ==================================================
+[13:14:26] Starting gauge processing...
+[13:14:26] Cropping gauges from image...
+[13:14:26] Processing cropped images...
+[13:14:26] Processing gauge 1...
+[13:14:26] Gauge 1: Unable to read - Processing error psi
+[13:14:26] Processing gauge 2...
+[13:14:26] Gauge 2: Unable to read - Processing error psi
+[13:14:26] Processing gauge 3...
+[13:14:26] Gauge 3: Unable to read - Processing error psi
+[13:14:26] Processing gauge 4...
+[13:14:26] Gauge 4: Unable to read - Processing error psi
+[13:14:26] Processing gauge 5...
+[13:14:26] Gauge 5: Unable to read - Processing error psi
+[13:14:26] Processing gauge 6...
+[13:14:26] Gauge 6: Unable to read - Processing error psi
+[13:14:26] Processing digital meter (Gauge 7)...
+[13:14:29] Gauge 7 (Digital): None
+[13:14:29] Results appended to: data/gauge_readings.csv
+[13:14:31] Files successfully uploaded to server: Files uploaded and processed successfully
+[13:14:31] Processing completed! 7 successful readings
+[13:18:30] Loaded 7 crop regions
+[13:18:30] Crop regions marked on image
+[13:18:30] Image captured and saved to: captured_image.jpg
+[13:18:33] ==================================================
+[13:18:33] Starting gauge processing...
+[13:18:33] Cropping gauges from image...
+[13:18:33] Processing cropped images...
+[13:18:34] Processing gauge 1...
+[13:18:34] Gauge 1: Unable to read - Processing error psi
+[13:18:34] Processing gauge 2...
+[13:18:34] Gauge 2: Unable to read - Processing error psi
+[13:18:34] Processing gauge 3...
+[13:18:34] Gauge 3: Unable to read - Processing error psi
+[13:18:34] Processing gauge 4...
+[13:18:34] Gauge 4: Unable to read - Processing error psi
+[13:18:34] Processing gauge 5...
+[13:18:34] Gauge 5: Unable to read - Processing error psi
+[13:18:34] Processing gauge 6...
+[13:18:34] Gauge 6: Unable to read - Processing error psi
+[13:18:34] Processing digital meter (Gauge 7)...
+[13:18:36] Gauge 7 (Digital): None
+[13:18:36] Results appended to: data/gauge_readings.csv
+[13:18:38] Files successfully uploaded to server: Files uploaded and processed successfully
+[13:18:38] Processing completed! 7 successful readings
+[13:18:41] Camera stopped
+[13:19:21] Default configuration loaded
+[13:19:22] Camera started
+[13:19:25] Loaded 7 crop regions
+[13:19:25] Crop regions marked on image
+[13:19:25] Image captured and saved to: captured_image.jpg
+[13:19:26] ==================================================
+[13:19:26] Starting gauge processing...
+[13:19:26] Cropping gauges from image...
+[13:19:26] Processing cropped images...
+[13:19:27] Processing gauge 1...
+[13:19:27] Gauge 1: Unable to read - Processing error psi
+[13:19:27] Processing gauge 2...
+[13:19:27] Gauge 2: Unable to read - Processing error psi
+[13:19:27] Processing gauge 3...
+[13:19:27] Gauge 3: Unable to read - Processing error psi
+[13:19:27] Processing gauge 4...
+[13:19:27] Gauge 4: Unable to read - Processing error psi
+[13:19:27] Processing gauge 5...
+[13:19:27] Gauge 5: Unable to read - Processing error psi
+[13:19:27] Processing gauge 6...
+[13:19:27] Gauge 6: Unable to read - Processing error psi
+[13:19:27] Processing digital meter (Gauge 7)...
+[13:19:29] Gauge 7 (Digital): unable to read file
+[13:19:29] Results appended to: data/gauge_readings.csv
