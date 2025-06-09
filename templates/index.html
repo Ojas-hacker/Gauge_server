@@ -3,490 +3,437 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gauge Readings Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .table-container { max-height: 500px; overflow-y: auto; }
-        .sticky-header th { position: sticky; top: 0; z-index: 10; }
-        .flatpickr-input { max-width: 200px; }
-        .download-btn { transition: all 0.3s ease; }
-        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .metric-card { transition: all 0.3s ease; }
-        .metric-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .sidebar { transition: all 0.3s ease; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .chart-container { background: linear-gradient(145deg, #f8fafc, #e2e8f0); }
-        .glass-effect { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
-        .pulse-animation { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .status-online { color: #10b981; }
-        .status-offline { color: #ef4444; }
-        .gauge-status { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .gauge-online { background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
-        .gauge-offline { background-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <title>Gauge Monitor</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .header-content h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header-content h3 {
+            margin: 5px 0 0;
+            font-size: 16px;
+            font-weight: normal;
+        }
+        .sync-info {
+            font-size: 14px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .stat-card h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .stat-card p {
+            margin: 10px 0 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #555;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter label {
+            font-size: 14px;
+            color: #333;
+        }
+        .filter input[type="date"] {
+            padding: 5px;
+            font-size: 14px;
+        }
+        .filter button, .actions button {
+            padding: 8px 15px;
+            font-size: 14px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .filter button:hover, .actions button:hover {
+            background-color: #0056b3;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .chart-section, .readings, .table-section {
+            margin: 20px 0;
+        }
+        .chart-section h2, .readings h3, .table-section h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        .chart-section p, .table-section p {
+            margin: 0 0 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        #chart-wrapper {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .gauge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .gauge-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .gauge-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .gauge-card p {
+            margin: 5px 0 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+        .table-wrapper {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .table th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            color: #333;
+        }
+        .table td .error {
+            color: red;
+        }
+        .table td .warning {
+            color: orange;
+        }
+        .overlay, .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .toast {
+            background-color: #28a745;
+        }
+    </style>
     <script>
-        let gaugeChart, trendChart;
-        let currentData = [];
+        // Initialize SocketIO
+        const socket = io();
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeDashboard();
-            initializeDatePicker();
-            initializeSocket();
-            initializeCharts();
+        // Set last sync time
+        function setLastSync() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('last-sync').textContent = timeString;
+        }
+
+        socket.on('csv_update', function(data) {
+            setLastSync();
+            window.location.reload();
         });
 
-        function initializeDashboard() {
-            // Simulate real-time gauge status updates
-            updateGaugeStatus();
-            setInterval(updateGaugeStatus, 5000);
-            
-            // Update last sync time
-            updateLastSync();
-            setInterval(updateLastSync, 30000);
+        socket.on('auto_download', function(data) {
+            console.log('Received auto download event:', data);
+            const link = document.createElement('a');
+            link.href = data.url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('Automatic download of new data started.');
+        });
+
+        function downloadCSV() {
+            const dateInput = document.getElementById('date-filter').value;
+            let url = '/download_csv';
+            if (dateInput) {
+                url += '?date=' + dateInput;
+            }
+            window.location.href = url;
         }
 
-        function initializeDatePicker() {
-            flatpickr("#datePicker", {
-                dateFormat: "Y-m-d",
-                onChange: function(selectedDates, dateStr) {
-                    showLoadingState();
-                    fetch(`/data?date=${dateStr}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            updateTable(data);
-                            updateInsights(data);
-                            updateCharts(data);
-                            hideLoadingState();
-                        })
-                        .catch(error => {
-                            console.error('Error fetching data:', error);
-                            hideLoadingState();
-                        });
-                }
-            });
+        function downloadAllData() {
+            window.location.href = '/download_csv';
         }
 
-        function initializeSocket() {
-            const socket = io();
-            socket.on('csv_update', function(data) {
-                updateTable(data);
-                updateInsights(data);
-                updateCharts(data);
-                showNotification('Data updated in real-time');
-            });
+        function filterByDate() {
+            const date = document.getElementById('date-filter').value;
+            if (date) {
+                fetch('/data?date=' + date)
+                    .then(response => response.json())
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
         }
 
-        function initializeCharts() {
-            // Gauge Status Chart
-            const gaugeCtx = document.getElementById('gaugeChart').getContext('2d');
-            gaugeChart = new Chart(gaugeCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Online', 'Offline'],
-                    datasets: [{
-                        data: [7, 0],
-                        backgroundColor: ['#10b981', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    cutout: '70%'
-                }
+        // Initialize chart
+        function createGaugeChart() {
+            const ctx = document.getElementById('gaugeChart').getContext('2d');
+            const data = {{ data | tojson }};
+            if (!data || data.length === 0) return;
+
+            const labels = data.map(row => row.time);
+            const datasets = [];
+            const gauges = ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'];
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'];
+
+            gauges.forEach((gauge, index) => {
+                datasets.push({
+                    label: gauge,
+                    data: data.map(row => {
+                        const value = row[gauge];
+                        return (value !== 'N/A' && value !== 'Unable to read - Processing error') ? parseFloat(value) : null;
+                    }),
+                    borderColor: colors[index],
+                    fill: false
+                });
             });
 
-            // Trend Chart
-            const trendCtx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(trendCtx, {
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Average Reading',
-                        data: [],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
+                    labels: labels,
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
                     scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        function updateTable(data) {
-            currentData = data;
-            const tableBody = document.querySelector('tbody');
-            tableBody.innerHTML = '';
-            
-            if (data.length === 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td colspan="8" class="text-center text-gray-500 py-8"><i class="fas fa-search mb-2 text-2xl block"></i>No data available for selected date</td>';
-                tableBody.appendChild(tr);
-                return;
-            }
-            
-            data.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                ['time', 'gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'].forEach(key => {
-                    const td = document.createElement('td');
-                    if (key === 'time') {
-                        td.innerHTML = `<span class="font-medium text-gray-900">${row[key] || 'N/A'}</span>`;
-                    } else {
-                        const value = row[key] || 'N/A';
-                        const numValue = parseFloat(value);
-                        let colorClass = 'text-gray-700';
-                        if (!isNaN(numValue)) {
-                            if (numValue > 80) colorClass = 'text-red-600 font-semibold';
-                            else if (numValue > 60) colorClass = 'text-yellow-600 font-semibold';
-                            else colorClass = 'text-green-600 font-semibold';
+                        x: {
+                            title: { display: true, text: 'Time' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Reading' }
                         }
-                        td.innerHTML = `<span class="${colorClass}">${value}</span>`;
                     }
-                    td.className = 'px-6 py-4 text-sm';
-                    tr.appendChild(td);
-                });
-                tr.className = `hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        function updateInsights(data) {
-            if (data.length === 0) return;
-
-            // Calculate insights
-            const totalReadings = data.length;
-            const gaugeColumns = ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'];
-            
-            let totalSum = 0, highAlerts = 0, avgSum = 0, validReadings = 0;
-            
-            data.forEach(row => {
-                gaugeColumns.forEach(gauge => {
-                    const value = parseFloat(row[gauge]);
-                    if (!isNaN(value)) {
-                        totalSum += value;
-                        validReadings++;
-                        if (value > 5000) highAlerts++;
-                    }
-                });
-            });
-
-            const avgReading = validReadings > 0 ? (totalSum / validReadings).toFixed(1) : 0;
-            const activeGauges = 7; 
-            const efficiency = Math.max(85, Math.floor(100 - (highAlerts / validReadings) * 100));
-
-            // Update metric cards
-            document.getElementById('totalReadings').textContent = totalReadings.toLocaleString();
-            document.getElementById('avgReading').textContent = avgReading;
-            document.getElementById('highAlerts').textContent = highAlerts;
-            document.getElementById('activeGauges').textContent = activeGauges;
-            document.getElementById('efficiency').textContent = efficiency + '%';
-        }
-
-        function updateCharts(data) {
-            if (data.length === 0) return;
-
-            // Update trend chart with hourly averages
-            const hourlyData = {};
-            data.forEach(row => {
-                const hour = row.time ? row.time.split(':')[0] : '00';
-                if (!hourlyData[hour]) hourlyData[hour] = [];
-                
-                ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'].forEach(gauge => {
-                    const value = parseFloat(row[gauge]);
-                    if (!isNaN(value)) hourlyData[hour].push(value);
-                });
-            });
-
-            const labels = Object.keys(hourlyData).sort();
-            const avgData = labels.map(hour => {
-                const values = hourlyData[hour];
-                return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-            });
-
-            trendChart.data.labels = labels.map(h => h + ':00');
-            trendChart.data.datasets[0].data = avgData;
-            trendChart.update();
-        }
-
-        function updateGaugeStatus() {
-            // Simulate gauge status
-            const gauges = ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'];
-            gauges.forEach((gauge, index) => {
-                const statusElement = document.getElementById(gauge + '-status');
-                const isOnline = Math.random() > 0.1; // 90% chance of being online
-                if (statusElement) {
-                    statusElement.className = isOnline ? 'gauge-status gauge-online' : 'gauge-status gauge-offline';
-                    statusElement.title = isOnline ? 'Online' : 'Offline';
                 }
             });
         }
 
-        function updateLastSync() {
-            const now = new Date();
-            document.getElementById('lastSync').textContent = now.toLocaleTimeString();
-        }
-
-        function showLoadingState() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-        }
-
-        function hideLoadingState() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.querySelector('span').textContent = message;
-            notification.classList.remove('hidden');
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 3000);
-        }
-
-        function refreshData() {
-            showLoadingState();
-            setTimeout(() => {
-                // Trigger data refresh
-                const event = new Event('change');
-                document.getElementById('datePicker').dispatchEvent(event);
-                hideLoadingState();
-                showNotification('Dashboard refreshed successfully');
-            }, 1000);
-        }
+        window.onload = function() {
+            setLastSync();
+            createGaugeChart();
+        };
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Navigation Header -->
-    <nav class="bg-white shadow-lg border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-tachometer-alt text-2xl text-blue-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h1 class="text-xl font-semibold text-gray-900">Gauge Monitor</h1>
-                        <p class="text-sm text-gray-500">Industrial Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-sm text-gray-500">
-                        Last sync: <span id="lastSync" class="font-medium text-gray-700">--:--:--</span>
-                    </div>
-                    <button onclick="refreshData()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-sync-alt text-gray-600"></i>
-                    </button>
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-white text-sm"></i>
-                    </div>
-                </div>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>Gauge Monitor</h1>
+                <h3>Industrial Dashboard</h3>
             </div>
-        </div>
-    </nav>
+            <div class="sync-info">
+                Last sync: <span id="last-sync">--:--:--</span>
+            </div>
+        </header>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Metrics Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-            <div class="metric-card bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100">
-                        <i class="fas fa-database text-blue-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600">Total Readings</p>
-                        <p id="totalReadings" class="text-2xl font-bold text-gray-900">0</p>
-                    </div>
-                </div>
+        <section class="stats">
+            <div class="stat-card">
+                <h3>Total Readings</h3>
+                <p>{{ data | length }}</p>
             </div>
-            
-            <div class="metric-card bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-100">
-                        <i class="fas fa-chart-line text-green-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600">Avg Reading</p>
-                        <p id="avgReading" class="text-2xl font-bold text-gray-900">0</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="metric-card bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-red-100">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600">High Alerts</p>
-                        <p id="highAlerts" class="text-2xl font-bold text-gray-900">0</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="metric-card bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-100">
-                        <i class="fas fa-cogs text-purple-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600">Active Gauges</p>
-                        <p id="activeGauges" class="text-2xl font-bold text-gray-900">7</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="metric-card bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100">
-                        <i class="fas fa-percentage text-yellow-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600">Efficiency</p>
-                        <p id="efficiency" class="text-2xl font-bold text-gray-900">95%</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Readings Trend</h3>
-                    <div class="flex items-center space-x-2 text-sm text-gray-500">
-                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span>Hourly Average</span>
-                    </div>
-                </div>
-                <div class="chart-container rounded-lg p-4">
-                    <canvas id="trendChart" height="100"></canvas>
-                </div>
+            <div class="stat-card">
+                <h3>Avg Reading</h3>
+                <p>
+                    {% set total = 0 %}
+                    {% set count = 0 %}
+                    {% for row in data %}
+                        {% for key in ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'] %}
+                            {% if row[key] | default('N/A') != 'N/A' and row[key] != 'Unable to read - Processing error' %}
+                                {% set total = total + (row[key] | float) %}
+                                {% set count = count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {% if count > 0 %}
+                        {{ (total / count) | round(2) }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </p>
             </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Gauge Status</h3>
-                <div class="flex justify-center mb-4">
-                    <div class="relative">
-                        <canvas id="gaugeChart" width="150" height="150"></canvas>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-gray-900">7/7</div>
-                                <div class="text-sm text-gray-500">Online</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center">
-                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                            <span class="text-gray-600">Online</span>
-                        </div>
-                        <span class="font-medium text-gray-900">7 gauges</span>
-                    </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center">
-                            <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                            <span class="text-gray-600">Offline</span>
-                        </div>
-                        <span class="font-medium text-gray-900">0 gauge</span>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Controls Section -->
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div>
-                        <label for="datePicker" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>Filter by Date
-                        </label>
-                        <input id="datePicker" class="flatpickr-input border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Select a date">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="refreshData()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center">
-                            <i class="fas fa-sync-alt mr-2"></i>Refresh
-                        </button>
-                    </div>
-                </div>
-                <a href="/download_csv" class="download-btn bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium flex items-center justify-center shadow-lg">
-                    <i class="fas fa-download mr-2"></i>Download Master CSV
-                </a>
+            <div class="stat-card">
+                <h3>High Alerts</h3>
+                <p>
+                    {% set alerts = 0 %}
+                    {% for row in data %}
+                        {% for key in ['gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'] %}
+                            {% if row[key] | default('N/A') != 'N/A' and row[key] != 'Unable to read - Processing error' and row[key] | float > 80 %}
+                                {% set alerts = alerts + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {{ alerts }}
+                </p>
             </div>
-        </div>
+        </section>
 
-        <!-- Gauge Status Overview -->
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Gauge Status Monitor</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+        <section class="controls">
+            <div class="filter">
+                <label for="date-filter">Filter by Date</label>
+                <input type="date" id="date-filter">
+                <button onclick="filterByDate()">Filter</button>
+            </div>
+
+            <div class="actions">
+                <button onclick="window.location.reload()">Refresh</button>
+                <button onclick="downloadCSV()">Download CSV</button>
+                <button onclick="downloadAllData()">Download All Data</button>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2>Latest 10 Readings Trend</h2>
+            <p>Real-time gauge readings visualization</p>
+            <div id="chart-wrapper">
+                <canvas id="gaugeChart"></canvas>
+            </div>
+        </section>
+
+        <section class="readings">
+            <h3>Gauge Readings</h3>
+            <div class="gauge-grid">
                 {% for i in range(1, 8) %}
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center">
-                        <span id="gauge-{{ i }}-status" class="gauge-status gauge-online"></span>
-                        <span class="text-sm font-medium text-gray-700">Gauge {{ i }}</span>
+                    <div class="gauge-card">
+                        <h3>Gauge {{ i }}</h3>
+                        <p>
+                            {% if data %}
+                                {% set latest = data[0] %}
+                                {% set value = latest['gauge-' + i|string] | default('N/A') %}
+                                {% if value != 'N/A' and value != 'Unable to read - Processing error' %}
+                                    {% if value|float > 80 %}
+                                        <span class="error">{{ value }}</span>
+                                    {% elif value|float > 60 %}
+                                        <span class="warning">{{ value }}</span>
+                                    {% else %}
+                                        <span>{{ value }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
                     </div>
-                    <i class="fas fa-tachometer-alt text-gray-400"></i>
-                </div>
                 {% endfor %}
             </div>
-        </div>
+        </section>
 
-        <!-- Data Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Recent Readings</h3>
-                <p class="text-sm text-gray-500 mt-1">Real-time gauge data monitoring</p>
-            </div>
-            <div class="table-container">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50 sticky-header">
+        <section class="table-section">
+            <h2>Recent Readings</h2>
+            <p>Real-time gauge data monitoring</p>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
                         <tr>
                             {% for key in ['time', 'gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'] %}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th>
                                     {% if key == 'time' %}
-                                        <i class="fas fa-clock mr-2"></i>{{ key }}
+                                        {{ key | title }}
                                     {% else %}
-                                        <i class="fas fa-tachometer-alt mr-2"></i>{{ key }}
+                                        {{ key }}
                                     {% endif %}
                                 </th>
                             {% endfor %}
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody>
                         {% for row in data %}
-                            <tr class="hover:bg-blue-50 transition-colors">
+                            <tr>
                                 {% for key in ['time', 'gauge-1', 'gauge-2', 'gauge-3', 'gauge-4', 'gauge-5', 'gauge-6', 'gauge-7'] %}
-                                    <td class="px-6 py-4 text-sm">
+                                    <td>
                                         {% if key == 'time' %}
-                                            <span class="font-medium text-gray-900">{{ row[key] | default('N/A') }}</span>
+                                            {{ row[key] | default('N/A') }}
                                         {% else %}
                                             {% set value = row[key] | default('N/A') %}
-                                            {% if value != 'N/A' and value|float > 80 %}
-                                                <span class="text-red-600 font-semibold">{{ value }}</span>
-                                            {% elif value != 'N/A' and value|float > 60 %}
-                                                <span class="text-yellow-600 font-semibold">{{ value }}</span>
+                                            {% if value != 'N/A' and value != 'Unable to read - Processing error' %}
+                                                {% if value|float > 80 %}
+                                                    <span class="error">{{ value }}</span>
+                                                {% elif value|float > 60 %}
+                                                    <span class="warning">{{ value }}</span>
+                                                {% else %}
+                                                    {{ value }}
+                                                {% endif %}
                                             {% else %}
-                                                <span class="text-green-600 font-semibold">{{ value }}</span>
+                                                {{ value }}
                                             {% endif %}
                                         {% endif %}
                                     </td>
@@ -496,23 +443,15 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span class="text-gray-700">Loading data...</span>
-        </div>
+    <div id="loading" class="overlay">
+        <p>Loading data...</p>
     </div>
 
-    <!-- Notification -->
-    <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 hidden">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span>Data updated successfully</span>
-        </div>
+    <div id="success-toast" class="toast">
+        <p>Data updated successfully</p>
     </div>
 </body>
 </html>
