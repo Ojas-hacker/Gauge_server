@@ -1,5 +1,7 @@
 flask
-flask-socketio
+flask-cors
 waitress
 apscheduler
 pymongo
+pendulum
+schedule
